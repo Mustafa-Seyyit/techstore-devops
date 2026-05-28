@@ -23,6 +23,7 @@ pipeline {
         stage('Setup') {
             steps {
                 sh '''
+                    rm -rf venv
                     python3 -m venv venv
                     . venv/bin/activate
                     pip install --upgrade pip
@@ -175,6 +176,7 @@ pipeline {
     }
 
     // ── POST ACTIONS ────────────────────────────────────────────
+    /*
     post {
         success {
             echo "🎉 Pipeline başarıyla tamamlandı!"
@@ -210,4 +212,20 @@ pipeline {
             cleanWs()
         }
     }
+    */
+
+    post {
+    success {
+        echo "🎉 Pipeline başarıyla tamamlandı!"
+    }
+
+    failure {
+        echo "❌ Pipeline başarısız oldu!"
+    }
+
+    always {
+        sh "docker image prune -f --filter 'until=72h' || true"
+        cleanWs()
+    }
+}
 }
