@@ -176,7 +176,9 @@ pipeline {
             steps {
                 sh '''
                     . venv/bin/activate
-                    pytest tests/test_ui.py -v --tb=short || true
+                    export BASE_URL=http://host.docker.internal:5001
+                    export CHROME_BIN=/usr/bin/chromium
+                    python -m pytest tests/test_ui.py -v --tb=short
                 '''
             }
         }

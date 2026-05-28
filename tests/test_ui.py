@@ -9,6 +9,7 @@ Gereksinimler:
 """
 import pytest
 import time
+import os
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
@@ -16,17 +17,21 @@ from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
-BASE_URL = 'http://localhost:5000'
+
+
+BASE_URL = os.getenv("BASE_URL", "http://localhost:5001")
 
 
 @pytest.fixture(scope='module')
 def driver():
     """Headless Chrome sürücüsü."""
     options = Options()
-    options.add_argument('--headless')
+    options.add_argument('--headless=new')
     options.add_argument('--no-sandbox')
     options.add_argument('--disable-dev-shm-usage')
+    options.add_argument("--disable-gpu")
     options.add_argument('--window-size=1280,900')
+    options.binary_location = os.getenv("CHROME_BIN", "/usr/bin/chromium")
 
     try:
         from webdriver_manager.chrome import ChromeDriverManager
