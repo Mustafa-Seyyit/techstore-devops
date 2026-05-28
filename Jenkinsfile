@@ -5,7 +5,7 @@ pipeline {
         DOCKER_IMAGE    = 'techstore-app'
         DOCKER_HUB_USER = 'mustafaseyyit8'          // Docker Hub kullanıcı adınız
         SONAR_HOST = 'http://host.docker.internal:9000'
-        SONAR_TOKEN     = credentials('sonar-token') // Jenkins Credentials'a ekleyin
+        //SONAR_TOKEN     = credentials('sonar-token') // Jenkins Credentials'a ekleyin
         SLACK_CHANNEL   = '#devops-techstore'
     }
 
@@ -65,13 +65,11 @@ pipeline {
                     withSonarQubeEnv('SonarQube') {
                         sh """
                             ${scannerHome}/bin/sonar-scanner \
-                                -Dsonar.projectKey=techstore \
-                                -Dsonar.projectName="TechStore E-Commerce" \
-                                -Dsonar.sources=. \
-                                -Dsonar.exclusions=venv/**,tests/**,**/__pycache__/** \
-                                -Dsonar.python.coverage.reportPaths=coverage.xml \
-                                -Dsonar.host.url=${SONAR_HOST} \
-                                -Dsonar.login=${SONAR_TOKEN}
+                                "-Dsonar.projectKey=techstore" \
+                                "-Dsonar.projectName=TechStore E-Commerce" \
+                                "-Dsonar.sources=." \
+                                "-Dsonar.exclusions=venv/**,tests/**,**/__pycache__/**" \
+                                "-Dsonar.python.coverage.reportPaths=coverage.xml"
                         """
                     }
                 }
