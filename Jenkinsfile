@@ -63,14 +63,20 @@ pipeline {
                     def scannerHome = tool 'SonarScanner'
 
                     withSonarQubeEnv('SonarQube') {
-                        sh """
-                            ${scannerHome}/bin/sonar-scanner \
-                                "-Dsonar.projectKey=techstore" \
-                                "-Dsonar.projectName=TechStore E-Commerce" \
-                                "-Dsonar.sources=." \
-                                "-Dsonar.exclusions=venv/**,tests/**,**/__pycache__/**" \
-                                "-Dsonar.python.coverage.reportPaths=coverage.xml"
-                        """
+                        withCredentials([string(credentialsId: 'sonar-token', variable: 'SONAR_TOKEN')]) {
+                            withEnv(["SCANNER_HOME=${scannerHome}"]) {
+                                sh '''
+                                    $SCANNER_HOME/bin/sonar-scanner \
+                                        "-Dsonar.projectKey=techstore" \
+                                        "-Dsonar.projectName=TechStore E-Commerce" \
+                                        "-Dsonar.sources=." \
+                                        "-Dsonar.exclusions=venv/**,tests/**,**/__pycache__/**" \
+                                        "-Dsonar.python.coverage.reportPaths=coverage.xml" \
+                                        "-Dsonar.host.url=http://host.docker.internal:9000" \
+                                        "-Dsonar.token=$SONAR_TOKEN"
+                                '''
+                            }
+                        }
                     }
                 }
             }
