@@ -3,8 +3,8 @@ pipeline {
 
     environment {
         DOCKER_IMAGE    = 'techstore-app'
-        DOCKER_HUB_USER = 'kullanici-adi'          // Docker Hub kullanıcı adınız
-        SONAR_HOST      = 'http://localhost:9000'
+        DOCKER_HUB_USER = 'mustafaseyyit8'          // Docker Hub kullanıcı adınız
+        SONAR_HOST = 'http://host.docker.internal:9000'
         SONAR_TOKEN     = credentials('sonar-token') // Jenkins Credentials'a ekleyin
         SLACK_CHANNEL   = '#devops-techstore'
     }
@@ -27,6 +27,7 @@ pipeline {
                     . venv/bin/activate
                     pip install --upgrade pip
                     pip install -r requirements.txt
+                    pip install pytest-cov
                 '''
                 echo "✅ Python sanal ortamı hazır"
             }
@@ -37,7 +38,7 @@ pipeline {
             steps {
                 sh '''
                     . venv/bin/activate
-                    pytest tests/test_app.py \
+                    python -m pytest tests/test_app.py \
                         -v \
                         --tb=short \
                         --junit-xml=test-results/unit-tests.xml \
@@ -130,7 +131,7 @@ pipeline {
                     docker run -d \
                         --name techstore-app \
                         --restart unless-stopped \
-                        -p 5000:5000 \
+                        -p 5001:5000 \
                         ${DOCKER_HUB_USER}/${DOCKER_IMAGE}:latest
 
                     echo "⏳ Sağlık kontrolü bekleniyor..."
@@ -144,14 +145,14 @@ pipeline {
             steps {
                 sh '''
                     # /health endpoint kontrol
-                    STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:5000/health)
+                    STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://host.docker.internal:5001/health)
                     if [ "$STATUS" != "200" ]; then
                         echo "❌ Smoke test başarısız! HTTP: $STATUS"
                         exit 1
                     fi
 
                     # Ana sayfa kontrol
-                    STATUS2=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:5000/)
+                    STATUS2=$(curl -s -o /dev/null -w "%{http_code}" http://host.docker.internal:5001/)
                     if [ "$STATUS2" != "200" ]; then
                         echo "❌ Ana sayfa erişilemiyor! HTTP: $STATUS2"
                         exit 1
